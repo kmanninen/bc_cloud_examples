@@ -6,6 +6,7 @@ mediapy
 scikit-learn
 tensorflow-datasets
 accelerate
+torchinfo
 
 # Akida packages
 akida ~= 2.14.0
