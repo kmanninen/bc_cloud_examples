@@ -1,0 +1,14 @@
+opencv-python==4.11.0.86
+
+# Akida examples requirements
+matplotlib
+mediapy
+scikit-learn
+tensorflow-datasets
+accelerate
+
+# Akida packages
+akida ~= 2.14.0
+cnn2snn ~= 2.14.0
+akida_models ~= 1.8.0
+tenns_modules ~= 0.1.0
