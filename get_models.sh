@@ -19,3 +19,4 @@ cd datasets
 wget https://data.brainchip.com/dataset-mirror/voc/test_20_classes.tfrecord
 wget https://data.brainchip.com/dataset-mirror/coco/coco_anchors.pkl
 wget https://data.brainchip.com/dataset-mirror/eye_tracking_ais2024_cvpr/eye_tracking_preprocessed_400frames_test.npz
+wget https://data.brainchip.com/dataset-mirror/samples/eye_tracking/eye_tracking_bs100.npz
