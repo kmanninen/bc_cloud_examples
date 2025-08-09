@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Snakes Game in A-Frame</title>
+    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+  </head>
+  <body>
+    <!-- Step 8: Finishing Touches - Add Instructions and Key Map -->
+    <div>
+      <h1>Instructions:</h1>
+      <p>Use the arrow keys to control the snake. Eat the red food box to grow!</p>
+      <h2>Key Map:</h2>
+      <ul>
+        <li>Arrow Up: Move Up</li>
+        <li>Arrow Down: Move Down</li>
+        <li>Arrow Left: Move Left</li>
+        <li>Arrow Right: Move Right</li>
+      </ul>
+    </div>
+    
+    <a-scene>
+      <!-- Step 3: Create the Game Board -->
+      <a-box id="game-board" position="0 0 -5" rotation="0 0 0" color="#4CC3D9" depth="10" height="10" width="10"></a-box>
+      
+      <!-- Initialize Snake -->
+      <a-box id="snake-head" position="0 0 -4" rotation="0 0 0" color="green" depth="1" height="1" width="1"></a-box>
+    </a-scene>
+
+    <script>
+      // Step 4: Implementing Snake Movement
+      let x = 0;
+      let y = 0;
+      let z = -4;
+      let direction = 'right'; // initial direction
+      let snakeHead = document.getElementById('snake-head');
+
+      document.addEventListener('keydown', function(event) {
+        if (event.code === 'ArrowUp') { direction = 'up'; }
+        if (event.code === 'ArrowDown') { direction = 'down'; }
+        if (event.code === 'ArrowLeft') { direction = 'left'; }
+        if (event.code === 'ArrowRight') { direction = 'right'; }
+      });
+
+      function moveSnake() {
+        if (direction === 'up') { y = Math.min(4, y + 1); }
+        if (direction === 'down') { y = Math.max(-4, y - 1); }
+        if (direction === 'left') { x = Math.max(-4, x - 1); }
+        if (direction === 'right') { x = Math.min(4, x + 1); }
+
+        snakeHead.setAttribute('position', `${x} ${y} ${z}`);
+      }
+
+      // Step 5: Adding Food Items (simplified, one food item)
+      let food = document.createElement('a-box');
+      food.setAttribute('id', 'food');
+      food.setAttribute('position', '2 2 -4');
+      food.setAttribute('color', 'red');
+      food.setAttribute('depth', '1');
+      food.setAttribute('height', '1');
+      food.setAttribute('width', '1');
+      document.querySelector('a-scene').appendChild(food);
+
+      // Step 6: Game Logic (simplified)
+      function checkCollision() {
+        let foodPosition = food.getAttribute('position');
+        let snakeHeadPosition = snakeHead.getAttribute('position');
+
+        if (foodPosition.x === snakeHeadPosition.x && foodPosition.y === snakeHeadPosition.y) {
+          // Implement growth and scoring logic here
+          alert('You ate the food!');
+        }
+      }
+
+      // Game Loop
+      setInterval(function() {
+        moveSnake();
+        checkCollision();
+      }, 500);
+    </script>
+    <script>
+      // Test if the script is even running
+      console.log('AFrame script loaded');
+      // Listen for events from parent Gradio app
+      window.addEventListener('message', function(event) {
+          // Log the received message for debugging
+          console.log('AFrame received message:', event);
+          console.log('Message data:', event.data);
+          console.log('Message origin:', event.origin);
+
+          if (event.data.type === 'gesture') {
+              console.log('Processing gesture:', event.data.keyCode);
+              document.dispatchEvent(new KeyboardEvent('keydown', {
+                  code: event.data.keyCode,
+                  bubbles: true
+              }));
+              console.log('KeyboardEvent dispatched');
+          }
+      });
+      // Also log when keyboard events are received
+      document.addEventListener('keydown', function(event) {
+          console.log('Keydown detected:', event.code, event.key);
+      });
+    </script>
+    
+  </body>
+</html>
