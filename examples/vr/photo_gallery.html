@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Photo Gallery</title>
+    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+  </head>
+  <body>
+    
+    <a-scene>
+        <!-- Disable default camera controls -->
+        <a-camera wasd-controls="enabled: false" 
+                    look-controls="enabled: false"
+                    cursor="rayOrigin: mouse"
+                    position="0 0 0"
+                    rotation="0 0 0"> 
+        </a-camera>
+            <!-- Add sky and ground -->
+        <a-sky color="#001122"></a-sky>
+        <a-plane position="0 -2 0" rotation="-90 0 0" width="20" height="20" color="#333" opacity="0.8"></a-plane>
+        
+        <!-- Stars -->
+        <a-sphere position="5 8 -10" radius="0.1" color="white" opacity="0.8"></a-sphere>
+        <a-sphere position="-7 6 -8" radius="0.1" color="white" opacity="0.6"></a-sphere>
+        <a-sphere position="3 9 -12" radius="0.1" color="white" opacity="0.9"></a-sphere>
+        <a-sphere position="-2 7 -15" radius="0.1" color="white" opacity="0.7"></a-sphere>
+
+        <!-- Clean floating logo with gentle rotation -->
+        <!--
+        <a-image id="logo" 
+                src="/gradio_api/file=img/_BrainChip_LOGO-Negative.png" 
+                position="0 1.5 -3.5" 
+                scale="0.6 0.6 1" 
+                material="transparent: true; alphaTest: 0.1"
+                animation__float="property: position.y; to: 4; dir: alternate; loop: true; dur: 5000; easing: easeInOutSine"
+                animation__rotate="property: rotation; to: 0 5 0; dir: alternate; loop: true; dur: 8000; easing: easeInOutSine">
+        </a-image>
+        -->
+        <a-entity id="floating-logo">
+            <a-image id="logo" 
+                src="/gradio_api/file=img/_BrainChip_LOGO-Negative.png" 
+                position="0 3 -10" 
+                scale="6 1.56 1"
+                material="transparent: true; alphaTest: 0.1">
+            </a-image>
+        </a-entity>
+
+        <a-entity id="gallery" position="0 0 0">
+            <a-image id="PCIe-Board-800x523" src="/gradio_api/file=img/PCIe-Board-800x523.png" position="-3 0 0" rotation="0 15 0"></a-image>
+            <a-image id="M2-Card-800x523" src="/gradio_api/file=img/M2-Card-800x523.png" position="-1 0 0" rotation="0 5 0"></a-image>
+            <a-image id="Akida-Edge-AI-box-800x523" src="/gradio_api/file=img/Akida-Edge-AI-box-800x523.png" position="1 0 0" rotation="0 -5 0"></a-image>
+            <a-image id="FPGA-Dev-platform-800x523" src="/gradio_api/file=img/FPGA-Dev-platform-800x523.png" position="3 0 0" rotation="0 -15 0"></a-image>
+            
+        </a-entity>
+    
+    </a-scene>
+
+    <script>
+        let currentPhoto = 1;
+        let zoomLevel = 1;
+        let gesture = '';
+
+        let zoomIncrement = 1; // ADD this line
+        let lastZoomTime = 0;
+        let zoomCooldown = 1; // 500ms cooldown between zoom actions
+
+        const photoIds = ['PCIe-Board-800x523', 'M2-Card-800x523', 'Akida-Edge-AI-box-800x523', 'FPGA-Dev-platform-800x523' ];
+
+
+        function resetGallery() {
+            currentPhoto = 1;
+            zoomLevel = 1;
+
+            // Reset ALL photos to base scale first
+            photoIds.forEach(id => {
+                document.getElementById(id).setAttribute('scale', '1 1 1');
+                document.getElementById(id).setAttribute('material', 'opacity: 1.0');
+            });
+
+            animateToPhoto(currentPhoto);
+            
+            console.log('Gallery reset to center');
+        }
+
+        function animateToPhoto(photoIndex) {
+            const gallery = document.getElementById('gallery');
+            const camera = document.querySelector('a-camera');
+
+            const newX = -photoIndex * 2 + 2; // Move 2 units per photo
+            
+            gallery.setAttribute('animation', {
+                property: 'position',
+                to: `${newX} 0 -5`,
+                dur: 800,
+                easing: 'easeInOutQuad'
+            });
+
+
+            // Rotate camera to look at selected photo
+            const photoPositions = [-3, -1, 1, 3]; // Your photo X positions  
+            const selectedPhotoWorldX = photoPositions[photoIndex] + newX; // Photo's final world position
+            
+            camera.setAttribute('animation__position', {
+                property: 'position',
+                to: `${selectedPhotoWorldX} 0 0`, // Camera moves to photo's X position
+                dur: 800,
+                easing: 'easeInOutQuad'
+            });
+
+            camera.setAttribute('animation__rotation', {
+                property: 'rotation',
+                to: `0 0 0`,
+                dur: 800,
+                easing: 'easeInOutQuad'
+            });
+
+                // Reset all photos to dim/small
+            photoIds.forEach((id, index) => {
+                const photo = document.getElementById(id);
+                if (index === photoIndex) {
+                    // Highlight selected photo
+                    photo.setAttribute('animation__scale', {
+                        property: 'scale',
+                        to: '1.2 1.2 1',
+                        dur: 600,
+                        easing: 'easeOutElastic'
+                    });
+                    photo.setAttribute('material', 'opacity: 1.0');
+                    // Move selected photo forward
+                    const pos = photo.getAttribute('position');
+                    photo.setAttribute('position', `${pos.x} ${pos.y} 1`); // Bring forward
+                } else {
+                    // Dim non-selected photos
+                    photo.setAttribute('animation__scale', {
+                        property: 'scale', 
+                        to: '0.8 0.8 1',
+                        dur: 600
+                    });
+                    photo.setAttribute('material', 'opacity: 0.6');
+                    // Move non-selected photos back
+                    const pos = photo.getAttribute('position');
+                    photo.setAttribute('position', `${pos.x} ${pos.y} 0`); // Push back
+                }
+            });
+        }
+
+        document.addEventListener('keydown', function(event) {
+            if (event.code === 'ArrowLeft') { gesture = 'swipe_left'; console.log('Swipe left detected'); navigatePhotos()}
+            if (event.code === 'ArrowRight') { gesture = 'swipe_right'; console.log('Swipe right detected'); navigatePhotos()}
+            if (event.code === 'ArrowUp') { gesture = 'zoom_in_full_hand'; console.log('Zoom in detected'); navigatePhotos()}
+            if (event.code === 'ArrowDown') { gesture = 'zoom_out_full_hand'; console.log('Zoom out detected'); navigatePhotos()}
+            if (event.code === 'Space') { gesture = 'shaking_hand'; console.log('Reset detected'); navigatePhotos()}
+        });
+
+        function navigatePhotos() {
+
+            const now = Date.now();
+
+            // Swipe Left/Right - Navigate photos
+            if (gesture === 'swipe_left') {
+                console.log('BEFORE swipe_left - currentPhoto:', currentPhoto);
+                currentPhoto = Math.max(0, currentPhoto - 1); // Can't go below 0
+                console.log('AFTER swipe_left - currentPhoto:', currentPhoto);
+                zoomLevel = 1;
+                animateToPhoto(currentPhoto);
+                gesture = ''; // Reset gesture after processing
+            }
+
+            if (gesture === 'swipe_right') {
+                console.log('BEFORE swipe_right - currentPhoto:', currentPhoto);
+                currentPhoto = Math.min(3, currentPhoto + 1); // Can't go above 3 (for 4 photos)
+                console.log('AFTER swipe_right - currentPhoto:', currentPhoto);
+                zoomLevel = 1;
+                animateToPhoto(currentPhoto);
+                gesture = ''; // Reset gesture after processing
+            }
+
+            // Zoom gestures - Examine photo details
+            if (gesture === 'zoom_in_full_hand' && (now - lastZoomTime) > zoomCooldown) {
+                console.log('Zoomed level start:', zoomLevel); // Add logging
+                zoomLevel = Math.max(0.5, zoomLevel + zoomIncrement);
+                document.getElementById(photoIds[currentPhoto]).setAttribute('scale', `${zoomLevel} ${zoomLevel} 1`);
+                lastZoomTime = now;
+                console.log('Zoomed out to:', zoomLevel); // Add logging
+                gesture = ''; // Reset gesture after processing
+            }
+
+            // Zoom gestures - Examine photo details
+            if (gesture === 'zoom_out_full_hand' && (now - lastZoomTime) > zoomCooldown) {
+                console.log('Zoomed level start:', zoomLevel); // Add logging
+                zoomLevel = Math.max(0.5, zoomLevel - zoomIncrement);
+                document.getElementById(photoIds[currentPhoto]).setAttribute('scale', `${zoomLevel} ${zoomLevel} 1`);
+                lastZoomTime = now;
+                console.log('Zoomed out to:', zoomLevel); // Add logging
+                gesture = ''; // Reset gesture after processing
+            }
+
+            // Reset gesture - Center the gallery
+            if (gesture === 'shaking_hand') {
+                resetGallery();
+                gesture = ''; // Reset gesture after processing
+            }
+        }
+
+        // Add this after your script loads
+        window.addEventListener('load', function() {
+            setTimeout(() => {
+                resetGallery(); // Center the gallery when page loads
+            }, 1000); // Wait 1 second for AFrame to initialize
+        });
+
+              // Game Loop
+        //setInterval(function() {
+        //    navigatePhotos();
+        //}, 500);
+    </script>
+    
+    <script>
+      // Test if the script is even running
+      console.log('AFrame script loaded');
+      // Listen for events from parent Gradio app
+      window.addEventListener('message', function(event) {
+          // Log the received message for debugging
+          console.log('AFrame received message:', event);
+          console.log('Message data:', event.data);
+          console.log('Message origin:', event.origin);
+
+          if (event.data.type === 'gesture') {
+              console.log('Processing gesture:', event.data.keyCode);
+              document.dispatchEvent(new KeyboardEvent('keydown', {
+                  code: event.data.keyCode,
+                  bubbles: true
+              }));
+              console.log('KeyboardEvent dispatched');
+          }
+      });
+      // Also log when keyboard events are received
+      document.addEventListener('keydown', function(event) {
+          console.log('Keydown detected:', event.code, event.key);
+      });
+    </script>
+    
+  </body>
+</html>
