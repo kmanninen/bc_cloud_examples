@@ -59,9 +59,9 @@
         let zoomLevel = 1;
         let gesture = '';
 
-        let zoomIncrement = 1; // ADD this line
+        let zoomIncrement = 5; // ADD this line
         let lastZoomTime = 0;
-        let zoomCooldown = 1; // 500ms cooldown between zoom actions
+        let zoomCooldown = 0.5; // 500ms cooldown between zoom actions
 
         const photoIds = ['PCIe-Board-800x523', 'M2-Card-800x523', 'Akida-Edge-AI-box-800x523', 'FPGA-Dev-platform-800x523' ];
 
@@ -177,7 +177,8 @@
             // Zoom gestures - Examine photo details
             if (gesture === 'zoom_in_full_hand' && (now - lastZoomTime) > zoomCooldown) {
                 console.log('Zoomed level start:', zoomLevel); // Add logging
-                zoomLevel = Math.max(0.5, zoomLevel + zoomIncrement);
+                //zoomLevel = Math.max(0.5, zoomLevel + zoomIncrement, 10);
+                zoomLevel = 5;
                 document.getElementById(photoIds[currentPhoto]).setAttribute('scale', `${zoomLevel} ${zoomLevel} 1`);
                 lastZoomTime = now;
                 console.log('Zoomed out to:', zoomLevel); // Add logging
@@ -187,7 +188,8 @@
             // Zoom gestures - Examine photo details
             if (gesture === 'zoom_out_full_hand' && (now - lastZoomTime) > zoomCooldown) {
                 console.log('Zoomed level start:', zoomLevel); // Add logging
-                zoomLevel = Math.max(0.5, zoomLevel - zoomIncrement);
+                //zoomLevel = Math.max(0.5, zoomLevel - zoomIncrement, 10);
+                zoomLevel = 5;
                 document.getElementById(photoIds[currentPhoto]).setAttribute('scale', `${zoomLevel} ${zoomLevel} 1`);
                 lastZoomTime = now;
                 console.log('Zoomed out to:', zoomLevel); // Add logging
