@@ -14,7 +14,6 @@ rm *.h5
 
 # Get datasets for examples
 cd ..
-mkdir -p datasets
 cd datasets
 
 wget https://data.brainchip.com/dataset-mirror/voc/test_20_classes.tfrecord
